@@ -1,0 +1,16 @@
+{
+  "name": "election-result-graph-for-yuanli-township",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "geo": "geojson2svg -i 全台灣村里界圖_20140501.json -o file.svg"
+  },
+  "author": "benebsiny",
+  "license": "ISC",
+  "dependencies": {
+    "geojson2svg": "^1.2.3",
+    "parse-svg": "0.0.0"
+  }
+}
