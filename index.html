@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <style>
+        body {
+            background-color: rgb(235, 235, 235);
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+
+    <title>苑裡鎮各里投票地圖</title>
+</head>
+
+<body>
+    <h1>2020總統大選</h1>
+    <svg id="svg2020" width="800px" height="600px" viewBox="0 0 800 600"></svg>
+    <h1>2016總統大選</h1>
+    <svg id="svg2016" width="800px" height="600px" viewBox="0 0 800 600"></svg>
+    <h1>2012總統大選</h1>
+    <svg id="svg2012" width="800px" height="600px" viewBox="0 0 800 600"></svg>
+    <h1>2008總統大選</h1>
+    <svg id="svg2008" width="800px" height="600px" viewBox="0 0 800 600"></svg>
+
+    <script>
+        let data2020, data2016, data2012, data2008;
+        let jsonFile;
+
+        // Open JSON file
+        function openFile(year) {
+
+            jsonFile = new XMLHttpRequest();
+            jsonFile.addEventListener("load", function () {
+                const data = JSON.parse(this.responseText);
+
+                if (year === 2020) data2020 = data;
+                else if (year === 2016) data2016 = data;
+                else if (year === 2012) data2012 = data;
+                else if (year === 2008) data2008 = data;
+            })
+            jsonFile.open('GET', `./data/${year}President.json`, false);
+            jsonFile.send();
+        }
+
+        function villageToColor(year, village) {
+            let content;
+            let data;
+
+            // 檢查年分
+            if (year === 2020) data = data2020;
+            else if (year === 2016) data = data2016;
+            else if (year === 2012) data = data2012;
+            else if (year === 2008) data = data2008;
+
+
+            // 找到正確的里
+            for (let i = 0; i < 25; i++)
+                if (data[i]['village'] === village)
+                    content = data[i];
+
+            // 填上顏色
+            if (content['party'] === '國民黨') {
+                if (content['ratio'] > 80) return "#005178"
+                if (content['ratio'] > 75) return "#09628E"
+                if (content['ratio'] > 70) return "#1273A3"
+                if (content['ratio'] > 65) return "#1B84B8"
+                if (content['ratio'] > 60) return "#2495CD"
+                if (content['ratio'] > 55) return "#48B2E5"
+                if (content['ratio'] > 50) return "#62BCE9"
+                return "#7BC8ED"
+            }
+            else if (content['party'] === '民進黨') {
+                if (content['ratio'] > 80) return "#325000"
+                if (content['ratio'] > 75) return "#456A06"
+                if (content['ratio'] > 70) return "#58840C"
+                if (content['ratio'] > 65) return "#6B9E12"
+                if (content['ratio'] > 60) return "#7EB818"
+                if (content['ratio'] > 55) return "#94CF39"
+                if (content['ratio'] > 50) return "#A9DB53"
+                return "#BEE76D"
+            }
+            return "grey"
+        }
+
+        openFile(2020, data2020);
+        openFile(2016, data2016);
+        openFile(2012, data2012);
+        openFile(2008, data2008);
+
+        const width = window.screen.width;
+        const height = window.screen.height;
+        const url = './data/Yuanli_geography.geojson'; // GeoJSON的檔案路徑
+
+
+        let mercatorScale, w = window.screen.width;
+        if (w > 1366) { mercatorScale = 11000; }
+        else if (w <= 1366 && w > 480) { mercatorScale = 9000; }
+        else { mercatorScale = 6000; }
+
+        var path = d3.geo.path().projection(
+            d3.geo
+                .mercator()
+                .center([120.68, 24.41])
+                .scale(mercatorScale * 40)
+                .translate([width / 2, height / 2.5])
+        );
+
+        function drawSVG(year) {
+            const svg = d3.select(`#svg${year}`)
+                .attr('width', width)
+                .attr('height', height)
+                .attr('viewBox', `0 0 ${width} ${height}`)
+
+            d3.json(url, (error, geometry) => {
+                if (error) throw error;
+
+                svg
+                    .selectAll('path')
+                    .data(geometry.features)
+                    .enter().append('path')
+                    .attr('d', path)
+                    .attr('fill', (feat) => {
+                        return villageToColor(year, feat.properties.VILLAGE)
+                    })
+            });
+        }
+
+        drawSVG(2020);
+        drawSVG(2016);
+        drawSVG(2012);
+        drawSVG(2008);
+    </script>
+</body>
+
+</html>
