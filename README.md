@@ -3,7 +3,7 @@
 內容包含2008~2020年總統大選，苑裡鎮各里的投票比率顏色圖。裡面的顏色，票多的深，票少的淺。
 
 ## DEMO
-可以直接從這裡看結果 [DEMO](https://benebsiny.github.io/Election-result-graph-for-Yuanli-township)
+可以直接從這裡看結果 [DEMO](https://benebsiny.github.io/Election-result-graph-for-Yuanli-township/)
 
 或者clone下來，所需步驟：
 1. 安裝環境
