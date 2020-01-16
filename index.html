@@ -48,9 +48,19 @@
         }
 
         .info {
+            left: 0;
             bottom: 0;
             transform: translateY(-100%);
             font-size: 1.5rem;
+        }
+
+        .legend-box {
+            top: 0;
+            right: 0;
+        }
+
+        .legend {
+            width: 10px;
         }
 
         #svg {
@@ -61,14 +71,28 @@
 
         @media screen and (min-width: 720px) and (max-width: 992px) {
             .info {
-                transform: translateY(-50%);
+                position: relative !important;
+                transform: translateY(-500px);
+                margin-bottom: -500px !important;
             }
         }
 
         @media screen and (max-width: 720px) {
             .info {
-                transform: translateY(-50%);
+                position: relative !important;
+                transform: translateY(-500px);
+                margin-bottom: -500px !important;
                 font-size: 1rem;
+            }
+
+            .info h1 {
+                font-size: 1.5rem;
+            }
+
+            .legend-box {
+                position: relative !important;
+                transform: translateY(-100px);
+                margin-bottom: -100px !important;
             }
         }
     </style>
@@ -95,11 +119,39 @@
                     <svg id="svg" width="800px" height="600px" viewBox="0 0 800 600"></svg>
                 </div>
 
-                <div class="info d-inline-block position-absolute p-5 m-5">
-                    <h1 class="village-name">苑港里</h1>
-                    <div>國民黨比率:<span class="kmt-ratio">23.29</span></div>
-                    <div>民進黨比率:<span class="dpp-ratio">71.8</span></div>
-                    <div>親民黨比率:<span class="pfp-ratio">4.91</span></div>
+                <div>
+                    <div class="info d-flex flex-column position-absolute p-5 m-5">
+                        <h1 class="village-name">苑港里</h1>
+                        <div>國民黨比率:<span class="kmt-ratio">23.29</span></div>
+                        <div>民進黨比率:<span class="dpp-ratio">71.8</span></div>
+                        <div>親民黨比率:<span class="pfp-ratio">4.91</span></div>
+                    </div>
+                    <div class="legend-box d-flex flex-column position-absolute p-5 m-5">
+                        <div>國民黨</div>
+                        <div class="legend-kmt d-flex" style="width: 100px; height: 20px;">
+                            <span class="legend flex-grow-1" style="background-color: #005178;"></span>
+                            <span class="legend flex-grow-1" style="background-color: #09628E"></span>
+                            <span class="legend flex-grow-1" style="background-color: #1273A3"></span>
+                            <span class="legend flex-grow-1" style="background-color: #1B84B8"></span>
+                            <span class="legend flex-grow-1" style="background-color: #2495CD"></span>
+                            <span class="legend flex-grow-1" style="background-color: #48B2E5"></span>
+                            <span class="legend flex-grow-1" style="background-color: #62BCE9"></span>
+                            <span class="legend flex-grow-1" style="background-color: #7BC8ED"></span>
+                        </div>
+                        <div></div>
+                        <div>民進黨</div>
+                        <div class="legend-kmt d-flex" style="width: 100px; height: 20px;">
+                            <span class="legend flex-grow-1" style="background-color: #325000;"></span>
+                            <span class="legend flex-grow-1" style="background-color: #456A06"></span>
+                            <span class="legend flex-grow-1" style="background-color: #58840C"></span>
+                            <span class="legend flex-grow-1" style="background-color: #6B9E12"></span>
+                            <span class="legend flex-grow-1" style="background-color: #7EB818"></span>
+                            <span class="legend flex-grow-1" style="background-color: #94CF39"></span>
+                            <span class="legend flex-grow-1" style="background-color: #A9DB53"></span>
+                            <span class="legend flex-grow-1" style="background-color: #BEE76D"></span>
+                        </div>
+                        <div><span style="float: left">80%</span><span style="float: right">50%</span></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -144,7 +196,7 @@
 
             $('.kmt-ratio').text(content['kmt'].toFixed(2));
             $('.dpp-ratio').text(content['dpp'].toFixed(2));
-            $('.pfp-ratio').text((content['pfp'])?content['pfp'].toFixed(2):'');
+            $('.pfp-ratio').text((content['pfp']) ? content['pfp'].toFixed(2) : '');
         });
 
 
@@ -153,8 +205,8 @@
         let jsonFile;
         let geometry;
         let path;
-        const width = $(window).width();
-        const height = $(window).height();
+        const width = 800//$(window).width();
+        const height = 800//$(window).height();
         const url = './data/Yuanli_geography.geojson'; // GeoJSON的檔案路徑
 
 
@@ -166,7 +218,7 @@
                 const data = JSON.parse(this.responseText);
 
                 if (mode === 'overview') {
-                    switch(year){
+                    switch (year) {
                         case 2020: data2020 = data; break;
                         case 2016: data2016 = data; break;
                         case 2012: data2012 = data; break;
@@ -174,7 +226,7 @@
                     }
                 }
                 else if (mode === 'detail') {
-                    switch(year){
+                    switch (year) {
                         case 2020: data2020_detail = data; break;
                         case 2016: data2016_detail = data; break;
                         case 2012: data2012_detail = data; break;
@@ -202,7 +254,7 @@
             let data;
 
             // 檢查年分
-            switch(year){
+            switch (year) {
                 case 2020: data = data2020; break;
                 case 2016: data = data2016; break;
                 case 2012: data = data2012; break;
