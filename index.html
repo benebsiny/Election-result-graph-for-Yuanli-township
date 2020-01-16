@@ -6,12 +6,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <style>
+        html {
+            height: 100%;
+        }
+
         body {
             background-color: rgb(235, 235, 235);
+            height: 100%;
         }
+        
         h1 {
             text-align: center;
+        }
+
+        path {
+            cursor: pointer;
+            paint-order: stroke fill;
+            stroke-width: 3;
+            stroke: white;
+            transition: all 0.2s linear;
+        }
+
+        path:hover {
+            opacity: 0.7;
+        }
+
+        .btn.avtive {
+            color: #fff;
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        .info {
+            bottom: 0;
+            transform: translateY(-100%);
+            font-size: 1.5rem;
+        }
+
+        #svg {
+            min-width: 800px;
+            min-width: 800px;
         }
     </style>
 
@@ -19,33 +58,121 @@
 </head>
 
 <body>
-    <h1>2020總統大選</h1>
-    <svg id="svg2020" width="800px" height="600px" viewBox="0 0 800 600"></svg>
-    <h1>2016總統大選</h1>
-    <svg id="svg2016" width="800px" height="600px" viewBox="0 0 800 600"></svg>
-    <h1>2012總統大選</h1>
-    <svg id="svg2012" width="800px" height="600px" viewBox="0 0 800 600"></svg>
-    <h1>2008總統大選</h1>
-    <svg id="svg2008" width="800px" height="600px" viewBox="0 0 800 600"></svg>
+    <div class="d-flex flex-column h-100">
+
+        <div class="container">
+            <div class="row">
+                <button class="mx-1 my-2 btn btn-outline-info active" id="2020-btn" data-year="2020">2020</button>
+                <button class="mx-1 my-2 btn btn-outline-info" id="2016-btn" data-year="2016">2016</button>
+                <button class="mx-1 my-2 btn btn-outline-info" id="2012-btn" data-year="2012">2012</button>
+                <button class="mx-1 my-2 btn btn-outline-info" id="2008-btn" data-year="2008">2008</button>
+            </div>
+        </div>
+    
+        <div class="container-fluid flex-grow-1">
+            <div class="row position-relative">
+                <div class="col-md-12 col-sm-12 svg-wrapper p-0">
+                    <h1><span class="title-year">2020</span>總統大選</h1>
+                    <svg id="svg" width="800px" height="600px" viewBox="0 0 800 600"></svg>
+                </div>
+
+                <div class="info d-inline-block position-absolute p-5 m-5">
+                    <h1 class="village-name">苑港里</h1>
+                    <div>國民黨比率:<span class="kmt-ratio">23.29</span></div>
+                    <div>民進黨比率:<span class="dpp-ratio">71.8</span></div>
+                    <div>親民黨比率:<span class="pfp-ratio">4.91</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script>
+        let currentYear = 2020;
+        
+        // 更改年分
+        $('.btn').on('click', function () {
+            
+            $('.btn').removeClass('active');
+            $(this).toggleClass('active');
+
+            currentYear = parseInt($(this).data('year'));
+
+            $('.title-year').text(currentYear);
+            drawSVG(currentYear);
+
+            if(currentYear===2008) $('.pfp-ratio').text('');
+            
+        });
+
+        // 點選里
+        $(document).on('mouseover', 'path', function () {
+
+            let data;
+            const thisVillage = $(this).data('village');
+
+            $('.village-name').text(thisVillage);
+
+            switch(currentYear){
+                case 2020: data = data2020_detail; break;
+                case 2016: data = data2016_detail; break;
+                case 2012: data = data2012_detail; break;
+                case 2008: data = data2008_detail; break;
+            }
+
+            for(let i=0; i<25; i++)
+                if(data[i]['village']===thisVillage)
+                    content = data[i];
+
+            $('.kmt-ratio').text(content['kmt']);
+            $('.dpp-ratio').text(content['dpp']);
+            $('.pfp-ratio').text(content['pfp']);
+        });
+
+
         let data2020, data2016, data2012, data2008;
+        let data2020_detail, data2016_detail, data2012_detail, data2008_detail;
         let jsonFile;
+        let geometry;
+        let path;
+        const width = $(window).width();
+        const height = $(window).height();
+        const url = './data/Yuanli_geography.geojson'; // GeoJSON的檔案路徑
 
-        // Open JSON file
-        function openFile(year) {
 
+        // Open JSON data file
+        function openFile(year, mode) {
+            
             jsonFile = new XMLHttpRequest();
             jsonFile.addEventListener("load", function () {
                 const data = JSON.parse(this.responseText);
 
-                if (year === 2020) data2020 = data;
-                else if (year === 2016) data2016 = data;
-                else if (year === 2012) data2012 = data;
-                else if (year === 2008) data2008 = data;
-            })
-            jsonFile.open('GET', `./data/${year}President.json`, false);
+                if(mode==='overview'){
+                    if (year === 2020) data2020 = data;
+                    else if (year === 2016) data2016 = data;
+                    else if (year === 2012) data2012 = data;
+                    else if (year === 2008) data2008 = data;
+                }
+                else if(mode==='detail'){
+                    if (year === 2020) data2020_detail = data;
+                    else if (year === 2016) data2016_detail = data;
+                    else if (year === 2012) data2012_detail = data;
+                    else if (year === 2008) data2008_detail = data;
+                }
+            });
+            jsonFile.open('GET', `./data/${mode}/${year}President_${mode}.json`, false);
             jsonFile.send();
+        }
+
+        // Open JSON geography file
+        function openGeojson() {
+            return new Promise(resolve=>{
+                d3.json(url, (error, geometrys) => {
+                    if (error) throw error;
+                    geometry = geometrys;
+                    resolve();
+                })
+            })
         }
 
         function villageToColor(year, village) {
@@ -88,53 +215,61 @@
             return "grey"
         }
 
-        openFile(2020, data2020);
-        openFile(2016, data2016);
-        openFile(2012, data2012);
-        openFile(2008, data2008);
-
-        const width = window.screen.width;
-        const height = window.screen.height;
-        const url = './data/Yuanli_geography.geojson'; // GeoJSON的檔案路徑
-
-
-        let mercatorScale, w = window.screen.width;
-        if (w > 1366) { mercatorScale = 11000; }
-        else if (w <= 1366 && w > 480) { mercatorScale = 9000; }
-        else { mercatorScale = 6000; }
-
-        var path = d3.geo.path().projection(
-            d3.geo
-                .mercator()
-                .center([120.68, 24.41])
-                .scale(mercatorScale * 40)
-                .translate([width / 2, height / 2.5])
-        );
-
-        function drawSVG(year) {
-            const svg = d3.select(`#svg${year}`)
-                .attr('width', width)
-                .attr('height', height)
-                .attr('viewBox', `0 0 ${width} ${height}`)
-
-            d3.json(url, (error, geometry) => {
-                if (error) throw error;
-
-                svg
-                    .selectAll('path')
-                    .data(geometry.features)
-                    .enter().append('path')
-                    .attr('d', path)
-                    .attr('fill', (feat) => {
-                        return villageToColor(year, feat.properties.VILLAGE)
-                    })
-            });
+        function SVGBasicInfo(){
+            let mercatorScale, w = window.screen.width;
+            if (w > 1366) { mercatorScale = 11000; }
+            else if (w <= 1366 && w > 480) { mercatorScale = 9000; }
+            else { mercatorScale = 6000; }
+    
+            path = d3.geo.path().projection(
+                d3.geo
+                    .mercator()
+                    .center([120.68, 24.42])
+                    .scale(mercatorScale * 37)
+                    .translate([width / 2, height / 2.5])
+            );
         }
 
-        drawSVG(2020);
-        drawSVG(2016);
-        drawSVG(2012);
-        drawSVG(2008);
+        function drawSVG(year) {
+            $('#svg').empty();
+            const svg = d3.select(`#svg`)
+                .attr('width', width)
+                .attr('height', height)
+                .attr('viewBox', `0 0 ${width} ${height}`);
+
+            console.log(width, height);
+            
+            
+            svg
+                .selectAll('path')
+                .data(geometry.features)
+                .enter().append('path')
+                .attr('d', path)
+                .attr('data-village', (feat) => {
+                    return feat.properties.VILLAGE;
+                })
+                .attr('fill', (feat) => {
+                    return villageToColor(year, feat.properties.VILLAGE)
+                });
+        }
+
+        async function initDraw(){
+            await openGeojson();
+            drawSVG(2020);
+        }
+
+        openFile(2020, 'overview');
+        openFile(2016, 'overview');
+        openFile(2012, 'overview');
+        openFile(2008, 'overview');
+        openFile(2020, 'detail');
+        openFile(2016, 'detail');
+        openFile(2012, 'detail');
+        openFile(2008, 'detail');
+
+        SVGBasicInfo();
+        initDraw();
+
     </script>
 </body>
 
