@@ -121,7 +121,6 @@
             drawSVG(currentYear);
 
             if (currentYear === 2008) $('.pfp-ratio').text('');
-
         });
 
         // 點選里
@@ -143,9 +142,9 @@
                 if (data[i]['village'] === thisVillage)
                     content = data[i];
 
-            $('.kmt-ratio').text(content['kmt']);
-            $('.dpp-ratio').text(content['dpp']);
-            $('.pfp-ratio').text(content['pfp']);
+            $('.kmt-ratio').text(content['kmt'].toFixed(2));
+            $('.dpp-ratio').text(content['dpp'].toFixed(2));
+            $('.pfp-ratio').text((content['pfp'])?content['pfp'].toFixed(2):'');
         });
 
 
@@ -167,16 +166,20 @@
                 const data = JSON.parse(this.responseText);
 
                 if (mode === 'overview') {
-                    if (year === 2020) data2020 = data;
-                    else if (year === 2016) data2016 = data;
-                    else if (year === 2012) data2012 = data;
-                    else if (year === 2008) data2008 = data;
+                    switch(year){
+                        case 2020: data2020 = data; break;
+                        case 2016: data2016 = data; break;
+                        case 2012: data2012 = data; break;
+                        case 2008: data2008 = data; break;
+                    }
                 }
                 else if (mode === 'detail') {
-                    if (year === 2020) data2020_detail = data;
-                    else if (year === 2016) data2016_detail = data;
-                    else if (year === 2012) data2012_detail = data;
-                    else if (year === 2008) data2008_detail = data;
+                    switch(year){
+                        case 2020: data2020_detail = data; break;
+                        case 2016: data2016_detail = data; break;
+                        case 2012: data2012_detail = data; break;
+                        case 2008: data2008_detail = data; break;
+                    }
                 }
             });
             jsonFile.open('GET', `./data/${mode}/${year}President_${mode}.json`, false);
@@ -199,11 +202,12 @@
             let data;
 
             // 檢查年分
-            if (year === 2020) data = data2020;
-            else if (year === 2016) data = data2016;
-            else if (year === 2012) data = data2012;
-            else if (year === 2008) data = data2008;
-
+            switch(year){
+                case 2020: data = data2020; break;
+                case 2016: data = data2016; break;
+                case 2012: data = data2012; break;
+                case 2008: data = data2008; break;
+            }
 
             // 找到正確的里
             for (let i = 0; i < 25; i++)
@@ -255,9 +259,6 @@
                 .attr('width', width)
                 .attr('height', height)
                 .attr('viewBox', `0 0 ${width} ${height}`);
-
-            console.log(width, height);
-
 
             svg
                 .selectAll('path')
