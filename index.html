@@ -41,12 +41,6 @@
             opacity: 0.7;
         }
 
-        .btn.avtive {
-            color: #fff;
-            background-color: #17a2b8;
-            border-color: #17a2b8;
-        }
-
         .info {
             left: 0;
             bottom: 0;
@@ -106,7 +100,9 @@
         <div class="container">
             <div class="row">
                 <button class="mx-1 my-2 btn btn-outline-info active" id="2020-btn" data-year="2020">2020</button>
+                <button class="mx-1 my-2 btn btn-outline-danger" id="2018-btn" data-year="2018">2018</button>
                 <button class="mx-1 my-2 btn btn-outline-info" id="2016-btn" data-year="2016">2016</button>
+                <button class="mx-1 my-2 btn btn-outline-danger" id="2014-btn" data-year="2014">2014</button>
                 <button class="mx-1 my-2 btn btn-outline-info" id="2012-btn" data-year="2012">2012</button>
                 <button class="mx-1 my-2 btn btn-outline-info" id="2008-btn" data-year="2008">2008</button>
             </div>
@@ -115,16 +111,17 @@
         <div class="container-fluid flex-grow-1">
             <div class="row position-relative">
                 <div class="col-md-12 col-sm-12 svg-wrapper p-0">
-                    <h1>苑裡鎮 <span class="title-year">2020</span>總統大選</h1>
+                    <h1>苑裡鎮<span class="title-year">2020總統大選</span></h1>
                     <svg id="svg" width="800px" height="600px" viewBox="0 0 800 600"></svg>
                 </div>
 
                 <div>
                     <div class="info d-flex flex-column position-absolute p-5 m-5">
                         <h1 class="village-name">苑港里</h1>
-                        <div>國民黨比率:<span class="kmt-ratio">23.29</span></div>
-                        <div>民進黨比率:<span class="dpp-ratio">71.8</span></div>
-                        <div>親民黨比率:<span class="pfp-ratio">4.91</span></div>
+                        <div class="kmt">國民黨比率:<span class="kmt-ratio">23.29</span></div>
+                        <div class="dpp">民進黨比率:<span class="dpp-ratio">71.8</span></div>
+                        <div class="ind" style="display: none;">無黨籍比率:<span class="ind-ratio"></span></div>
+                        <div class="pfp">親民黨比率:<span class="pfp-ratio">4.91</span></div>
                     </div>
                     <div class="legend-box d-flex flex-column position-absolute p-5 m-5">
                         <div>國民黨</div>
@@ -150,6 +147,17 @@
                             <span class="legend flex-grow-1" style="background-color: #A9DB53"></span>
                             <span class="legend flex-grow-1" style="background-color: #BEE76D"></span>
                         </div>
+                        <div>無黨籍</div>
+                        <div class="legend-kmt d-flex" style="width: 100px; height: 20px;">
+                            <span class="legend flex-grow-1" style="background-color: #5B5B5B"></span>
+                            <span class="legend flex-grow-1" style="background-color: #686868"></span>
+                            <span class="legend flex-grow-1" style="background-color: #818181"></span>
+                            <span class="legend flex-grow-1" style="background-color: #8E8E8E"></span>
+                            <span class="legend flex-grow-1" style="background-color: #989898"></span>
+                            <span class="legend flex-grow-1" style="background-color: #A2A2A2"></span>
+                            <span class="legend flex-grow-1" style="background-color: #B5B5B5"></span>
+                            <span class="legend flex-grow-1" style="background-color: #C9C9C9"></span>
+                        </div>
                         <div><span style="float: left">80%</span><span style="float: right">50%</span></div>
                     </div>
                 </div>
@@ -164,15 +172,39 @@
         // 更改年分
         $('.btn').on('click', function () {
 
+            // 上方按鈕
             $('.btn').removeClass('active');
             $(this).toggleClass('active');
 
+            // 全域變數
             currentYear = parseInt($(this).data('year'));
 
-            $('.title-year').text(currentYear);
+            // 標題
+            if (currentYear % 4 === 0) $('.title-year').text(`${currentYear}總統大選`);
+            else $('.title-year').text(`${currentYear}縣長選舉`);
+
+            // 地圖內容
             drawSVG(currentYear);
 
-            if (currentYear === 2008) $('.pfp-ratio').text('');
+            // 圖例
+            if (currentYear === 2008 || currentYear === 2014) {
+                $('.dpp').show();
+                $('.ind').hide();
+                $('.pfp').css('visibility', 'hidden');
+            }
+            else if (currentYear === 2018){
+                $('.dpp').hide();
+                $('.ind').show();
+                $('.pfp').css('visibility', 'hidden');
+            }
+            else {
+                $('.dpp').show();
+                $('.ind').hide();
+                $('.pfp').css('visibility', 'visible');
+            }
+
+            // 詳細資料
+            changeVillageInfo(currentYear, $('.village-name').text())
         });
 
         // 點選里
@@ -183,62 +215,97 @@
 
             $('.village-name').text(thisVillage);
 
-            switch (currentYear) {
-                case 2020: data = data2020_detail; break;
-                case 2016: data = data2016_detail; break;
-                case 2012: data = data2012_detail; break;
-                case 2008: data = data2008_detail; break;
-            }
-
-            for (let i = 0; i < 25; i++)
-                if (data[i]['village'] === thisVillage)
-                    content = data[i];
-
-            $('.kmt-ratio').text(content['kmt'].toFixed(2));
-            $('.dpp-ratio').text(content['dpp'].toFixed(2));
-            $('.pfp-ratio').text((content['pfp']) ? content['pfp'].toFixed(2) : '');
+            changeVillageInfo(currentYear, thisVillage);
         });
 
+        function changeVillageInfo(year, village) {
+            let data = getData(year, 'detail');
 
-        let data2020, data2016, data2012, data2008;
-        let data2020_detail, data2016_detail, data2012_detail, data2008_detail;
+            for (let i = 0; i < 25; i++)
+                if (data[i]['village'] === village)
+                    content = data[i];
+
+            $('.kmt-ratio').text((content['kmt']) ? content['kmt'].toFixed(2) : '');
+            $('.dpp-ratio').text((content['dpp']) ? content['dpp'].toFixed(2) : '');
+            $('.ind-ratio').text((content['ind']) ? content['ind'].toFixed(2) : '');
+            $('.pfp-ratio').text((content['pfp']) ? content['pfp'].toFixed(2) : '');
+        }
+
+
+        let data2020, data_2018, data2016, data2014, data2012, data2008;
+        let data2020_detail, data_2018_detail, data2016_detail, data2014_detail, data2012_detail, data2008_detail;
         let jsonFile;
         let geometry;
         let path;
-        const width = 800//$(window).width();
-        const height = 800//$(window).height();
+        const width = 800;
+        const height = 800;
         const url = './data/Yuanli_geography.geojson'; // GeoJSON的檔案路徑
 
+        function getData(year, mode) {
+            if (mode === 'overview') {
+                switch (year) {
+                    case 2020: return data2020;
+                    case 2018: return data2018;
+                    case 2016: return data2016;
+                    case 2014: return data2014;
+                    case 2012: return data2012;
+                    case 2008: return data2008;
+                }
+            }
+            else if (mode === 'detail') {
+                switch (year) {
+                    case 2020: return data2020_detail;
+                    case 2018: return data2018_detail;
+                    case 2016: return data2016_detail;
+                    case 2014: return data2014_detail;
+                    case 2012: return data2012_detail;
+                    case 2008: return data2008_detail;
+                }
+            }
+        }
 
-        // Open JSON data file
+        function postData(year, mode, data) {
+            if (mode === 'overview') {
+                switch (year) {
+                    case 2020: data2020 = data; break;
+                    case 2018: data2018 = data; break;
+                    case 2016: data2016 = data; break;
+                    case 2014: data2014 = data; break;
+                    case 2012: data2012 = data; break;
+                    case 2008: data2008 = data; break;
+                }
+            }
+            else if (mode === 'detail') {
+                switch (year) {
+                    case 2020: data2020_detail = data; break;
+                    case 2018: data2018_detail = data; break;
+                    case 2016: data2016_detail = data; break;
+                    case 2014: data2014_detail = data; break;
+                    case 2012: data2012_detail = data; break;
+                    case 2008: data2008_detail = data; break;
+                }
+            }
+        }
+
+        // 打開JSON資料檔
         function openFile(year, mode) {
+
+            let position = 'President';
+            if (year % 4 !== 0) position = 'Mayor'
+
 
             jsonFile = new XMLHttpRequest();
             jsonFile.addEventListener("load", function () {
                 const data = JSON.parse(this.responseText);
 
-                if (mode === 'overview') {
-                    switch (year) {
-                        case 2020: data2020 = data; break;
-                        case 2016: data2016 = data; break;
-                        case 2012: data2012 = data; break;
-                        case 2008: data2008 = data; break;
-                    }
-                }
-                else if (mode === 'detail') {
-                    switch (year) {
-                        case 2020: data2020_detail = data; break;
-                        case 2016: data2016_detail = data; break;
-                        case 2012: data2012_detail = data; break;
-                        case 2008: data2008_detail = data; break;
-                    }
-                }
+                postData(year, mode, data);
+
             });
-            jsonFile.open('GET', `./data/${mode}/${year}President_${mode}.json`, false);
+            jsonFile.open('GET', `./data/${mode}/${year}${position}_${mode}.json`, false);
             jsonFile.send();
         }
 
-        // Open JSON geography file
+        // 打開GEOJSON檔
         function openGeojson() {
             return new Promise(resolve => {
                 d3.json(url, (error, geometrys) => {
@@ -249,17 +316,13 @@
             })
         }
 
+
         function villageToColor(year, village) {
             let content;
             let data;
 
             // 檢查年分
-            switch (year) {
-                case 2020: data = data2020; break;
-                case 2016: data = data2016; break;
-                case 2012: data = data2012; break;
-                case 2008: data = data2008; break;
-            }
+            data = getData(year, 'overview');
 
             // 找到正確的里
             for (let i = 0; i < 25; i++)
@@ -287,7 +350,17 @@
                 if (content['ratio'] > 50) return "#A9DB53"
                 return "#BEE76D"
             }
-            return "grey"
+            else if (content['party'] === '無黨籍') {
+                if (content['ratio'] > 80) return "#5B5B5B"
+                if (content['ratio'] > 75) return "#686868"
+                if (content['ratio'] > 70) return "#818181"
+                if (content['ratio'] > 65) return "#8E8E8E"
+                if (content['ratio'] > 60) return "#989898"
+                if (content['ratio'] > 55) return "#A2A2A2"
+                if (content['ratio'] > 50) return "#B5B5B5"
+                return "#C9C9C9"
+            }
+            return "#EBEBEB"
         }
 
         function SVGBasicInfo() {
@@ -331,11 +404,16 @@
         }
 
         openFile(2020, 'overview');
+        openFile(2018, 'overview');
         openFile(2016, 'overview');
+        openFile(2014, 'overview');
         openFile(2012, 'overview');
         openFile(2008, 'overview');
+
         openFile(2020, 'detail');
+        openFile(2018, 'detail');
         openFile(2016, 'detail');
+        openFile(2014, 'detail');
         openFile(2012, 'detail');
         openFile(2008, 'detail');
 
