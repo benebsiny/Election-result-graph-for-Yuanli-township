@@ -104,6 +104,7 @@
                 <button class="mx-1 my-2 btn btn-outline-info" id="2016-btn" data-year="2016">2016</button>
                 <button class="mx-1 my-2 btn btn-outline-danger" id="2014-btn" data-year="2014">2014</button>
                 <button class="mx-1 my-2 btn btn-outline-info" id="2012-btn" data-year="2012">2012</button>
+                <button class="mx-1 my-2 btn btn-outline-danger" id="2009-btn" data-year="2009">2009</button>
                 <button class="mx-1 my-2 btn btn-outline-info" id="2008-btn" data-year="2008">2008</button>
             </div>
         </div>
@@ -120,8 +121,9 @@
                         <h1 class="village-name">苑港里</h1>
                         <div class="kmt">國民黨比率:<span class="kmt-ratio">23.29</span></div>
                         <div class="dpp">民進黨比率:<span class="dpp-ratio">71.8</span></div>
-                        <div class="ind" style="display: none;">無黨籍比率:<span class="ind-ratio"></span></div>
                         <div class="pfp">親民黨比率:<span class="pfp-ratio">4.91</span></div>
+                        <div class="ind" style="display: none;">無黨籍比率:<span class="ind-ratio"></span></div>
+                        <div class="hello" style="display: none; visibility: hidden;">你找到我了~</div>
                     </div>
                     <div class="legend-box d-flex flex-column position-absolute p-5 m-5">
                         <div>國民黨</div>
@@ -188,19 +190,32 @@
 
             // 圖例
             if (currentYear === 2008 || currentYear === 2014) {
+                $('.kmt').show();
                 $('.dpp').show();
+                $('.pfp').hide();
                 $('.ind').hide();
-                $('.pfp').css('visibility', 'hidden');
+                $('.hello').show();
+            }
+            else if (currentYear === 2009){
+                $('.kmt').show();
+                $('.dpp').show();
+                $('.pfp').hide();
+                $('.ind').show();
+                $('.hello').hide();
             }
             else if (currentYear === 2018){
+                $('.kmt').show();
                 $('.dpp').hide();
+                $('.pfp').hide();
                 $('.ind').show();
-                $('.pfp').css('visibility', 'hidden');
+                $('.hello').show();
             }
             else {
+                $('.kmt').show();
                 $('.dpp').show();
+                $('.pfp').show();
                 $('.ind').hide();
-                $('.pfp').css('visibility', 'visible');
+                $('.hello').hide();
             }
 
             // 詳細資料
@@ -232,8 +247,8 @@
         }
 
 
-        let data2020, data_2018, data2016, data2014, data2012, data2008;
-        let data2020_detail, data_2018_detail, data2016_detail, data2014_detail, data2012_detail, data2008_detail;
+        let data2020, data_2018, data2016, data2014, data2012, data_2009, data2008;
+        let data2020_detail, data_2018_detail, data2016_detail, data2014_detail, data2012_detail, data2009_detail, data2008_detail;
         let jsonFile;
         let geometry;
         let path;
@@ -249,6 +264,7 @@
                     case 2016: return data2016;
                     case 2014: return data2014;
                     case 2012: return data2012;
+                    case 2009: return data2009;
                     case 2008: return data2008;
                 }
             }
@@ -259,6 +275,7 @@
                     case 2016: return data2016_detail;
                     case 2014: return data2014_detail;
                     case 2012: return data2012_detail;
+                    case 2009: return data2009_detail;
                     case 2008: return data2008_detail;
                 }
             }
@@ -272,6 +289,7 @@
                     case 2016: data2016 = data; break;
                     case 2014: data2014 = data; break;
                     case 2012: data2012 = data; break;
+                    case 2009: data2009 = data; break;
                     case 2008: data2008 = data; break;
                 }
             }
@@ -282,6 +300,7 @@
                     case 2016: data2016_detail = data; break;
                     case 2014: data2014_detail = data; break;
                     case 2012: data2012_detail = data; break;
+                    case 2009: data2009_detail = data; break;
                     case 2008: data2008_detail = data; break;
                 }
             }
@@ -408,6 +427,7 @@
         openFile(2016, 'overview');
         openFile(2014, 'overview');
         openFile(2012, 'overview');
+        openFile(2009, 'overview');
         openFile(2008, 'overview');
 
         openFile(2020, 'detail');
@@ -415,6 +435,7 @@
         openFile(2016, 'detail');
         openFile(2014, 'detail');
         openFile(2012, 'detail');
+        openFile(2009, 'detail');
         openFile(2008, 'detail');
 
         SVGBasicInfo();
